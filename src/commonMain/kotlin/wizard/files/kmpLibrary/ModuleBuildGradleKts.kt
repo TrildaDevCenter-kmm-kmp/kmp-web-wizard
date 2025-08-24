@@ -17,8 +17,6 @@ class ModuleBuildGradleKts(info: ProjectInfo) : ProjectFile {
             }
         }
 
-        appendLine("import com.vanniktech.maven.publish.SonatypeHost")
-        appendLine("")
         appendLine("plugins {")
         plugins.forEach { dep ->
             appendLine("    ${dep.pluginNotation}")
@@ -58,6 +56,11 @@ class ModuleBuildGradleKts(info: ProjectInfo) : ProjectFile {
         appendLine("")
         appendLine("    sourceSets {")
         appendLine("        commonMain.dependencies {")
+        if (plugins.contains(ComposePlugin)) {
+            appendLine("            implementation(compose.runtime)")
+            appendLine("            implementation(compose.ui)")
+            appendLine("            implementation(compose.foundation)")
+        }
         commonDeps.forEach { dep ->
             appendLine("            ${dep.libraryNotation}")
         }
@@ -98,7 +101,7 @@ class ModuleBuildGradleKts(info: ProjectInfo) : ProjectFile {
             appendLine("")
         }
         if (info.hasDependenciesFor(ProjectPlatform.Wasm)) {
-            appendLine("        getByName(\"wasmJsMain\").dependencies {")
+            appendLine("        wasmJsMain.dependencies {")
             otherDeps.forEach { dep ->
                 if (dep.platforms.contains(ProjectPlatform.Wasm)) {
                     appendLine("            ${dep.libraryNotation}")
@@ -178,7 +181,7 @@ class ModuleBuildGradleKts(info: ProjectInfo) : ProjectFile {
         appendLine("//Publishing your Kotlin Multiplatform library to Maven Central")
         appendLine("//https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html")
         appendLine("mavenPublishing {")
-        appendLine("    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)")
+        appendLine("    publishToMavenCentral()")
         appendLine("    coordinates(\"${info.packageId}\", \"${info.moduleName}\", \"1.0.0\")")
         appendLine("")
         appendLine("    pom {")
